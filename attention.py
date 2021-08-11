@@ -6,6 +6,12 @@ import matplotlib.pyplot as plt
 import io
 from PIL import Image
 
+import matplotlib.font_manager as fm
+
+font_path = r'NanumGothicCoding.ttf'
+fontprop = fm.FontProperties(fname=font_path, size=18)
+
+plt.rcParams["font.family"] = 'NanumGothic'
 hatespeech_category_map = {
     "0": "일반글",
     "1": "공격발언",
@@ -20,13 +26,14 @@ def visualize_attention(sent, attention_matrix, n_words=10):
                         cbar=False, ax=ax)
         
     # make plt figure with 1x6 subplots
-    fig = plt.figure()
+    fig = plt.figure(figsize=(16, 8))
     # fig.subplots_adjust(hspace=0.7, wspace=0.2)
     for i, layer in enumerate(range(1, 12, 2)):
         ax = fig.add_subplot(2, 3, i+1)
         ax.set_title("Layer {}".format(layer))
-        draw(attention_matrix[layer], sent if layer < 6 else [], sent if layer in [1,7] else [], ax=ax)
-        
+        draw(attention_matrix[layer], sent if layer > 6 else [], sent if layer in [1,7] else [], ax=ax)
+ 
+    fig.tight_layout()
     plt.close()
     # fig, axs = plt.subplots(1,6, figsize=(20, 10))
 
@@ -82,5 +89,5 @@ if __name__ == '__main__':
 
 
     #Create a gradio app with a button that calls predict()
-    app = gr.Interface(fn=predict, inputs=['text', 'text'], outputs=['label', 'plot'])
+    app = gr.Interface(fn=predict, server_port=22333, server_name='0.0.0.0', inputs=['text', 'text'], outputs=['label', 'plot'])
     app.launch(inline=False)
