@@ -18,23 +18,14 @@ def visualize_attention(sent, attention_matrix, n_words=10):
         seaborn.heatmap(data, 
                         xticklabels=x, square=True, yticklabels=y, vmin=0.0, vmax=1.0, 
                         cbar=False, ax=ax)
-    
-    def plot_to_image(figure=None):
-        if figure is None:
-            figure = plt.gcf()
-        buf = io.BytesIO()
-        figure.savefig(buf, format='png')
-        buf.seek(0)
-        image = Image.open(buf)
-        plt.close(figure)
-        return image
         
     # make plt figure with 1x6 subplots
     fig = plt.figure()
     # fig.subplots_adjust(hspace=0.7, wspace=0.2)
     for i, layer in enumerate(range(1, 12, 2)):
         ax = fig.add_subplot(2, 3, i+1)
-        draw(attention_matrix[layer], sent, sent if layer < 2 else [], ax=ax)
+        ax.set_title("Layer {}".format(layer))
+        draw(attention_matrix[layer], sent if layer < 6 else [], sent if layer in [1,7] else [], ax=ax)
         
     plt.close()
     # fig, axs = plt.subplots(1,6, figsize=(20, 10))
@@ -60,7 +51,7 @@ def visualize_attention(sent, attention_matrix, n_words=10):
     #             sent, tgt_sent if h ==0 else [], ax=axs[h])
     #     plt.show()
 
-    return plot_to_image(fig)
+    return fig
 
 
 
@@ -87,13 +78,9 @@ if __name__ == '__main__':
     text = 'This is a test'
     output = predict(model_name, text)
     
-    # label = torch.argmax(output[0], dim=-1).numpy()
-    #attn = output[1]
-    # print(output[0].size())
-    #print(attn)
     print(output)
 
 
     #Create a gradio app with a button that calls predict()
-    app = gr.Interface(fn=predict, inputs=['text', 'text'], outputs=['label', 'image'])
+    app = gr.Interface(fn=predict, inputs=['text', 'text'], outputs=['label', 'plot'])
     app.launch(inline=False)
